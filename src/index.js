@@ -17,7 +17,6 @@ class Board {
     for (let i = 0; i < position.length; i++) {
       this.field[position[i]] = 1;
     }
-    console.log(this.field);
     this.shipsPlaced += 1;
     if (this.shipsPlaced === this.shipAmount) {
       this.allShipsPlaced = true;
@@ -38,20 +37,17 @@ class Board {
   }
   receiveAttack(square) {
     if (this.field[square] === 0) {
-      console.log("Miss");
       this.field[square] = 2;
     } else if (this.field[square] === 1) {
-      console.log("Hit");
       this.field[square] = 3;
       this.allHits += 1;
       this.registerHitShip(square);
     }
     this.markAttackSquare(square, this.field[square]);
-    console.log(this.name, this.allHits);
   }
+
   markAttackSquare(shot, box) {
     const square = document.querySelector(`[data-square='${String(shot)}']`);
-    console.log(square);
     if (box === 2) {
       square.classList.add("water");
     } else if (box === 3) {
@@ -77,7 +73,6 @@ class Board {
           if (ship.hits === ship.length) {
             ship.sunk = true;
             this.markSunkenShip(ship.position);
-            console.log(this.allHits);
             this.allShipsSunk();
           }
         }
@@ -127,7 +122,36 @@ class Board {
   }
 
   comAttack() {
+    let lastShot = comBoard.usedChoices.slice(-1);
+    lastShot = lastShot[0];
+    console.log(lastShot);
     let comChoice = Math.floor(Math.random() * (100 - 1)) + 1;
+    if (
+      playerBoard.field[lastShot] === 3 &&
+      playerBoard.field[lastShot + 1] === 1
+    ) {
+      comChoice = lastShot + 1;
+    } else if (
+      playerBoard.field[lastShot] === 3 &&
+      playerBoard.field[lastShot - 1] === 1
+    ) {
+      comChoice = lastShot - 1;
+    } else if (
+      playerBoard.field[lastShot] === 3 &&
+      playerBoard.field[lastShot - 2] === 1
+    ) {
+      comChoice = lastShot - 2;
+    } else if (
+      playerBoard.field[lastShot] === 3 &&
+      playerBoard.field[lastShot - 3] === 1
+    ) {
+      comChoice = lastShot - 3;
+    } else {
+      while (comBoard.usedChoices.includes(comChoice)) {
+        comChoice = Math.floor(Math.random() * (100 - 1)) + 1;
+      }
+    }
+    comBoard.usedChoices.push(comChoice);
     playerBoard.receiveAttack(comChoice);
   }
 }
@@ -170,14 +194,11 @@ const checkIfPlaced = (board, shipStart) => {
         board.shipsPlaced > 0
       ) {
         setShipPosition(ship.position, uncheckedPosition);
-        console.log(ship.position);
         board.placeShip(ship.position);
         board.markSquare(ship.position);
         ship.placed = true;
       } else if (board.shipsPlaced === 0) {
         setShipPosition(ship.position, uncheckedPosition);
-        console.log(ship.position);
-
         board.placeShip(ship.position);
         board.markSquare(ship.position);
         ship.placed = true;
@@ -238,8 +259,11 @@ board[1].addEventListener("click", (e) => {
   let targetElement = e.target;
   if (targetElement.matches(".field")) {
     let shot = parseInt(targetElement.getAttribute("data-square"));
-    console.log(targetElement);
-    if (playerBoard.allShipsPlaced === true) {
+    if (
+      playerBoard.allShipsPlaced === true &&
+      !playerBoard.usedChoices.includes(shot)
+    ) {
+      playerBoard.usedChoices.push(shot);
       comBoard.receiveAttack(shot);
       comBoard.comAttack();
     }
