@@ -7,15 +7,11 @@ class Board {
     this.shipAmount = shipNum;
     this.allShipsLength = [2, 3, 3, 4];
     this.allShips = this.createShips(4, this.allShipsLength);
-    this.field = [
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      0,
-    ];
+    this.field = this.createFields();
     this.shipsPlaced = 0;
     this.allShipsPlaced = false;
+    this.allHits = 0;
+    this.usedChoices = [];
   }
   placeShip(position) {
     for (let i = 0; i < position.length; i++) {
@@ -25,6 +21,7 @@ class Board {
     this.shipsPlaced += 1;
     if (this.shipsPlaced === this.shipAmount) {
       this.allShipsPlaced = true;
+      console.log("All Ships placed");
     }
   }
   markSquare(position) {
@@ -32,7 +29,11 @@ class Board {
       const square = document.querySelector(
         `[data-square='${String(position[i])}']`
       );
-      square.classList.add("placedShip");
+      if (this.name === "Computer") {
+        square.classList.add("placedShipCom");
+      } else {
+        square.classList.add("placedShip");
+      }
     }
   }
   receiveAttack(square) {
@@ -41,16 +42,73 @@ class Board {
       this.field[square] = 2;
     } else if (this.field[square] === 1) {
       console.log("Hit");
-      while (targetElement != null) this.field[square] = 3;
+      this.field[square] = 3;
+      this.allHits += 1;
+      this.registerHitShip(square);
+    }
+    this.markAttackSquare(square, this.field[square]);
+    console.log(this.name, this.allHits);
+  }
+  markAttackSquare(shot, box) {
+    const square = document.querySelector(`[data-square='${String(shot)}']`);
+    console.log(square);
+    if (box === 2) {
+      square.classList.add("water");
+    } else if (box === 3) {
+      square.classList.add("shipHit");
     }
   }
-  createBoard() {
+
+  markSunkenShip(position) {
+    for (let i = 0; i < position.length; i++) {
+      const square = document.querySelector(
+        `[data-square='${String(position[i])}']`
+      );
+      square.classList.add("sunk");
+      this.field[position[i]] = 4;
+    }
+  }
+
+  registerHitShip(square) {
+    this.allShips.forEach((ship) => {
+      for (let i = 0; i < ship.position.length; i++) {
+        if (ship.position[i] === square) {
+          ship.hits += 1;
+          if (ship.hits === ship.length) {
+            ship.sunk = true;
+            this.markSunkenShip(ship.position);
+            console.log(this.allHits);
+            this.allShipsSunk();
+          }
+        }
+      }
+    });
+  }
+
+  allShipsSunk() {
+    if (this.allHits === 12) {
+      if (this.name === "Computer") {
+        console.log("Gewonnen");
+      } else {
+        console.log("Verloren");
+      }
+    }
+  }
+
+  createBoard(num) {
     const content = document.querySelector("#content");
-    const board = createTag(content, "div", "board");
+    const board = createTag(content, "div", this.name, "board");
     for (let i = 1; i <= 100; i++) {
       let field = createTag(board, "div", null, "field");
-      field.setAttribute("data-square", i);
+      field.setAttribute("data-square", i + num);
     }
+  }
+  createFields() {
+    let fields = [];
+    for (let i = 0; i <= 301; i++) {
+      fields.push(0);
+    }
+    return fields;
   }
   createShips(num, list) {
     const allShips = [];
@@ -61,13 +119,24 @@ class Board {
     return allShips;
   }
 
-  comShips() {}
+  comShips() {
+    while (this.allShipsPlaced === false) {
+      let shipStart = Math.floor(Math.random() * (300 - 201)) + 201;
+      checkIfPlaced(this, shipStart);
+    }
+  }
+
+  comAttack() {
+    let comChoice = Math.floor(Math.random() * (100 - 1)) + 1;
+    playerBoard.receiveAttack(comChoice);
+  }
 }
 
 class Ship {
   constructor(length) {
     this.length = length;
     this.position = this.startPosition(length);
+    this.hits = 0;
     this.sunk = false;
     this.horizontal = true;
     this.placed = false;
@@ -81,34 +150,98 @@ class Ship {
   }
 }
 
-const checkIfPlaced = (shipStart) => {
-  playerBoard.allShips.every((ship) => {
+const checkIfPlaced = (board, shipStart) => {
+  board.allShips.every((ship) => {
     if (ship.placed === false) {
+      let uncheckedPosition = "";
+      let beforeBorderCheck_right = [];
+      let beforeBorderCheck_left = [];
       for (let i = 0; i < ship.length; i++) {
-        ship.position[i] = shipStart + i;
-        console.log(ship.position);
+        beforeBorderCheck_right[i] = shipStart + i;
+        beforeBorderCheck_left[i] = shipStart - i;
       }
-      ship.placed = true;
-      playerBoard.placeShip(ship.position);
-      playerBoard.markSquare(ship.position);
+      if (checkBorder(beforeBorderCheck_right)) {
+        uncheckedPosition = beforeBorderCheck_left;
+      } else {
+        uncheckedPosition = beforeBorderCheck_right;
+      }
+      if (
+        checkDoublePlacement(board.allShips, uncheckedPosition) === false &&
+        board.shipsPlaced > 0
+      ) {
+        setShipPosition(ship.position, uncheckedPosition);
+        console.log(ship.position);
+        board.placeShip(ship.position);
+        board.markSquare(ship.position);
+        ship.placed = true;
+      } else if (board.shipsPlaced === 0) {
+        setShipPosition(ship.position, uncheckedPosition);
+        console.log(ship.position);
+
+        board.placeShip(ship.position);
+        board.markSquare(ship.position);
+        ship.placed = true;
+      }
+
       return false;
     }
     return true;
   });
 };
 
+const checkDoublePlacement = (placedShips, position) => {
+  let check = false;
+  placedShips.forEach((ship) => {
+    for (let i = 0; i < ship.position.length; i++) {
+      for (let j = 0; j < position.length; j++) {
+        if (ship.position[i] === position[j]) {
+          check = true;
+        }
+      }
+    }
+  });
+  return check;
+};
+
+const setShipPosition = (shipPos, newPos) => {
+  for (let i = 0; i < newPos.length; i++) {
+    shipPos[i] = newPos[i];
+  }
+};
+
+const checkBorder = (pos) => {
+  if (pos.at(-2) % 10 === 0 || pos.at(-3) % 10 === 0 || pos.at(-4) % 10 === 0) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
 const playerBoard = new Board("Player", 4);
 const comBoard = new Board("Computer", 4);
-playerBoard.createBoard();
-comBoard.createBoard();
+playerBoard.createBoard(0);
+comBoard.createBoard(200);
+comBoard.comShips();
 
-const board = document.querySelector("#board");
-board.addEventListener("click", (e) => {
+const board = document.querySelectorAll(".board");
+board[0].addEventListener("click", (e) => {
   let targetElement = e.target;
   if (targetElement.matches(".field")) {
     let shipStart = parseInt(targetElement.getAttribute("data-square"));
     if (playerBoard.allShipsPlaced === false) {
-      checkIfPlaced(shipStart);
+      checkIfPlaced(playerBoard, shipStart);
+    }
+  }
+});
+
+board[1].addEventListener("click", (e) => {
+  let targetElement = e.target;
+  if (targetElement.matches(".field")) {
+    let shot = parseInt(targetElement.getAttribute("data-square"));
+    console.log(targetElement);
+    if (playerBoard.allShipsPlaced === true) {
+      comBoard.receiveAttack(shot);
+      comBoard.comAttack();
     }
   }
 });
