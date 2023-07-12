@@ -81,6 +81,13 @@ body {
       margin-top: 20px;
       height: 30px;
       width: 80px;
+      border: none;
+      border-radius: 5px;
+      background-color: blanchedalmond;
+      border: 1px solid black;
+      &:hover {
+        opacity: 0.8;
+      }
     }
   }
   #message {
@@ -89,8 +96,8 @@ body {
     color: white;
   }
   #newGame {
-    margin-left: 48vw;
-    margin-right: 50vw;
+    margin-left: 47vw;
+    margin-right: 48vw;
     margin-top: 10px;
   }
   .hide {
