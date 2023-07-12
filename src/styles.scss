@@ -96,9 +96,18 @@ body {
     color: white;
   }
   #newGame {
+    width: 100px;
+    height: 40px;
     margin-left: 47vw;
     margin-right: 48vw;
     margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: blanchedalmond;
+    border: 1px solid black;
+    &:hover {
+      opacity: 0.8;
+    }
   }
   .hide {
     opacity: 0;
