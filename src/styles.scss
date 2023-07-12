@@ -3,11 +3,35 @@
   box-sizing: border-box;
 }
 
+#header {
+  text-align: center;
+  height: 160px;
+  padding-top: 40px;
+  border-bottom: 1px solid black;
+  display: grid;
+  grid-template-columns: 4fr 1fr 4fr;
+  #heading {
+    grid-row: 1;
+    grid-column: 2;
+    font-size: 2.5em;
+  }
+  #playerName {
+    grid-row: 2;
+    grid-column: 1;
+    font-size: 1.5em;
+  }
+  #comName {
+    grid-row: 2;
+    grid-column: 3;
+    font-size: 1.5em;
+  }
+}
+
 #content {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   justify-items: center;
-  margin-top: 100px;
+  margin-top: 30px;
   .board {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
@@ -34,4 +58,15 @@
       background-color: black;
     }
   }
+  #direction {
+    margin-top: 20px;
+    height: 30px;
+    width: 80px;
+  }
+  .hide {
+    opacity: 0;
+  }
+}
+#message {
+  text-align: center;
 }
