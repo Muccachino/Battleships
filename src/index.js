@@ -19,6 +19,7 @@ gui(comBoard, playerBoard);
 //all Event Listener
 
 const board = document.querySelectorAll(".board");
+board[0].classList.add("playerBackground");
 board[0].addEventListener("click", (e) => {
   let targetElement = e.target;
   if (targetElement.matches(".field")) {
@@ -34,6 +35,7 @@ board[0].addEventListener("click", (e) => {
   }
 });
 
+board[1].classList.add("comBackground");
 board[1].addEventListener("click", (e) => {
   let targetElement = e.target;
   if (targetElement.matches(".field")) {
