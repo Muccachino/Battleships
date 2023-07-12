@@ -40,7 +40,9 @@ board[1].addEventListener("click", (e) => {
     let shot = parseInt(targetElement.getAttribute("data-square"));
     if (
       playerBoard.allShipsPlaced === true &&
-      !playerBoard.usedChoices.includes(shot)
+      !playerBoard.usedChoices.includes(shot) &&
+      playerBoard.allHits != 12 &&
+      comBoard.allHits != 12
     ) {
       playerBoard.usedChoices.push(shot);
       comBoard.receiveAttack(shot);

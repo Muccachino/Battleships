@@ -34,6 +34,13 @@ const gui = (com, player) => {
     null,
     "Place your ships on the left board. Change directions by clicking the button first"
   );
+  const newGame = createTag(
+    document.body,
+    "button",
+    "newGame",
+    "hide",
+    "New Game"
+  );
 };
 
 export { computer, player, gui };

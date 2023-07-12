@@ -5,8 +5,8 @@
 
 #header {
   text-align: center;
-  height: 160px;
-  padding-top: 40px;
+  height: 140px;
+  padding-top: 20px;
   border-bottom: 1px solid black;
   display: grid;
   grid-template-columns: 4fr 1fr 4fr;
@@ -46,7 +46,7 @@
       background-color: green;
     }
     .placedShipCom {
-      background-color: purple;
+      background-color: transparent;
     }
     .water {
       background-color: mediumblue;
@@ -63,10 +63,15 @@
     height: 30px;
     width: 80px;
   }
-  .hide {
-    opacity: 0;
-  }
 }
 #message {
   text-align: center;
+}
+#newGame {
+  margin-left: 48vw;
+  margin-right: 50vw;
+  margin-top: 10px;
+}
+.hide {
+  opacity: 0;
 }

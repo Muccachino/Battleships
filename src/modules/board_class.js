@@ -91,6 +91,11 @@ class Board {
         console.log("Verloren");
         message.innerHTML = "All your ships have been sunk! <br> You Lose!!!";
       }
+      const newGame = document.querySelector("#newGame");
+      newGame.addEventListener("click", () => {
+        location.reload();
+      });
+      newGame.classList.remove("hide");
     }
   }
 
